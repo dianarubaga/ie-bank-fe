@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 env:
+
   FRONTEND_WEBAPP_DEV: didi-fe-dev
   FRONTEND_WEBAPP_UAT: didi-fe-uat  # Added UAT frontend web app
   SUBSCRIPTION_ID_DEV: e0b9cada-61bc-4b5a-bd7a-52c606726b3b
@@ -29,6 +30,7 @@ jobs:
           npm install
           npm run build:dev  ## This command will build the Vue.js app using .env.development variables
 
+
       - name: Upload artifact for deployment job (Development)
         uses: actions/upload-artifact@v4
         with:
@@ -44,6 +46,7 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
+
       - name: Download artifact from build-dev job
         uses: actions/download-artifact@v4
         with:
