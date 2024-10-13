@@ -8,7 +8,7 @@ on:
 
 env:
   FRONTEND_WEBAPP_DEV: didi-fe-dev
-  FRONTEND_WEBAPP_UAT: didi-fe-uat
+  FRONTEND_WEBAPP_UAT: didi-fe-uat  # Added UAT frontend web app
   SUBSCRIPTION_ID_DEV: e0b9cada-61bc-4b5a-bd7a-52c606726b3b
   USER_ALIAS: didi
 
@@ -17,18 +17,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
+          node-version: '20.x'   # Set Node.js version explicitly
 
       - name: npm install, build, and test (Development)
         run: |
           npm install
-          npm run build -- --mode development --dest dist-dev ## This command builds the Vue.js app using .env.development variables
+          npm run build:dev  ## This command will build the Vue.js app using .env.development variables
 
       - name: Upload artifact for deployment job (Development)
         uses: actions/upload-artifact@v4
@@ -41,6 +40,7 @@ jobs:
     needs: build-dev
     environment:
       name: 'Development'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
       - name: Download artifact from build-dev job
@@ -54,7 +54,7 @@ jobs:
 
       - name: 'Deploy to Azure Web App - Development'
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.FRONTEND_WEBAPP_DEV }}
           package: .
@@ -63,18 +63,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'npm'
+          node-version: '20.x'   # Ensure Node.js version is consistent
 
       - name: npm install, build, and test (UAT)
         run: |
           npm install
-          npm run build -- --mode production --dest dist-uat ## This command builds the Vue.js app using .env.uat variables
+          npm run build:uat ## This command will build the Vue.js app using .env.uat variables
 
       - name: Upload artifact for deployment job (UAT)
         uses: actions/upload-artifact@v4
@@ -87,6 +86,7 @@ jobs:
     needs: build-uat
     environment:
       name: 'UAT'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
       - name: Download artifact from build-uat job
@@ -100,7 +100,7 @@ jobs:
 
       - name: 'Deploy to Azure Web App - UAT'
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.FRONTEND_WEBAPP_UAT }}
           package: .
