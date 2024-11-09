@@ -1,0 +1,31 @@
+#Specifies the base image for the Docker container
+FROM node:lts-alpine
+
+#Declares a build-time variable named MODE
+ARG MODE
+
+# Install a simple HTTP server for serving static content
+RUN npm install -g http-server
+
+# Set the working directory named app 
+WORKDIR /app
+
+# Copy package files (its like the requierments.txt but for the frontend)
+COPY package*.json ./
+
+# Install project dependencies
+RUN npm install
+
+# This copies all files and directories from your current local 
+# directory to the /app directory in the Docker container.
+COPY . .
+
+# Build the app
+RUN npm run build -- --mode ${MODE}
+
+# Expose the application on port 8080
+EXPOSE 8080
+
+# Command to run the server
+#This runs http-server to serve the static content from the dist directory. 
+CMD ["http-server", "dist", "--proxy", "http://localhost:8080?"]
